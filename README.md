@@ -106,6 +106,114 @@ Lets begin by making a Remote control with have only one button and it can turn 
 #### Note: This code is present in [simple_remote_control!](https://github.com/chiragkaushik/Command-Pattern/tree/main/Simple_remote_control) directory in this repository 
 
 
+
+ ### Now lets define a Remote Control which can be configured to operate on Seven devices simultaneously with each device having 2 buttons reserved for its operations.
+ 
+1. We need to follow the same steps which we followed while creating Simple Remote Control with only one Button. we need to provide a way to assign commands to slots. In this case we have seven slots, each with an "on" and "off" button. So we can assign commands to the remote like this:
+    ```
+    onCommands[0] = onCommand;
+    offCommands[0] = offCommand;
+    ```
+2. Define device which is to be operated by Remote Control, as we defined in simple remote control.
+    ```
+    public class Light{
+        public void on(){
+            System.out.println("Light is on");
+        }
+        public void off(){
+            System.out.println("Light is off");
+        }
+    }
+    ```
+3. Define a interface for Command. So that Remote Control knows what type commands can be assigned to its Slots.
+    ```
+    public interface Command{
+        public void execute();
+    }
+    ```
+4. Define Command which implements the Common Command interface.
+    ```
+   public class LightOnCommand implements Command{
+     Light light;
+     public LightOnCommand(Light light){
+        this.light = light;
+     }
+     public void execute(){
+        light.on();
+     }
+   }
+    ```
+   ```
+   public class LightOffCommand implements Command{
+     Light light;
+     public LightOffCommand(Light light){
+        this.light = light;
+     }
+     public void execute(){
+        light.off();
+     }
+   }
+    ```
+   # Method Usage
+   - execute() method in a command to stores how the particular task is executed on the device. For example: how to 
+   turn on/off light in this case.  
+5. Define a command that does nothing(i.e. noCommand) which we will assign to all the slots of the remote before assigning commands to the slots. So that we do not have to check if a command is loaded every time we referenced a slot.
+   ```
+    public class NoCommand implements Command {
+        public void execute(){}
+    }
+    ```
+6. Now we can define Remote Loader and assign tasks to the Remote Control slots and use it to perform our desired tasks as we did in case of Simple Remote control.
+    ```
+    public class RemoteLoader{
+    public static void main(String args[]){
+        //  Create a RemoteControl
+        RemoteControl remoteControl = new RemoteControl();
+   
+        //Make Devices over which Remote Control can operate upon
+        //  Create a living room Light object
+        Light livingRoomLight = new Light("Living Room");
+        //  Create a kitchen room Light object
+        Light kitchenLight = new Light("Kitchen");
+        //  Create a Ceiling Fan object
+        CeilingFan ceilingFan = new CeilingFan("Living Room");
+        //  Create a Stereo object
+        Stereo stereo = new Stereo("Living Room");
+        
+        //  Crate Command to be loaded on Remote Control buttons
+        LightOnCommand livingRoomLightOn = new LightOnCommand(livingRoomLight);
+        LightOffCommand livingRoomLightOff = new LightOffCommand(livingRoomLight);
+        LightOnCommand kitchenLightOn = new LightOnCommand(kitchenLight);
+        LightOffCommand kitchenLightOff = new LightOffCommand(kitchenLight);
+
+        CeilingFanOnCommand ceilingFanOn = new CeilingFanOnCommand(ceilingFan);
+        CeilingFanOffCommand ceilingFanOff = new CeilingFanOffCommand(ceilingFan);
+
+        StereoOnWithCDCommand stereoOnWithCD = new StereoOnWithCDCommand(stereo);
+        StereoOffCommand stereoOff = new StereoOffCommand(stereo);
+        
+        //  Load commands on Remote control buttons
+        remoteControl.setCommand(0, livingRoomLightOn, livingRoomLightOff);
+        remoteControl.setCommand(1, kitchenLightOn, kitchenLightOff);
+        remoteControl.setCommand(2, ceilingFanOn, ceilingFanOff);
+        remoteControl.setCommand(3, stereoOnWithCD, stereoOff);
+
+        System.out.println(remoteControl);
+        
+        // Remote Control is ready to operate upon different devices now.
+        remoteControl.onButtonWasPushed(0);
+        remoteControl.offButtonWasPushed(0);
+        remoteControl.onButtonWasPushed(1);
+        remoteControl.offButtonWasPushed(1);
+        remoteControl.onButtonWasPushed(2);
+        remoteControl.offButtonWasPushed(2);
+        remoteControl.onButtonWasPushed(3);
+        remoteControl.offButtonWasPushed(3);
+    }
+}
+    ```
+
+#### Note: This code is present in [remote_control](https://github.com/chiragkaushik/Command-Pattern/tree/main/remote_control) directory in this repository
  
 
 
