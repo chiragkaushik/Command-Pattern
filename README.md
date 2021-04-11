@@ -216,4 +216,144 @@ Lets begin by making a Remote control with have only one button and it can turn 
 #### Note: This code is present in [remote_control](https://github.com/chiragkaushik/Command-Pattern/tree/main/remote_control) directory in this repository
  
 
+ ## Add undo functionality to our Remote Control
+ #### Undo button is used to reverse last action performed by a device on receiving command from our Remote Control
+ 
+ 1. Add undo method to our Command interface. undo() method mirrors the execute() method.
+     ```
+     public interface Command {
+        public void execute();
+        public void undo();
+     }
+    ```
+ 2. Define device which is to be operated by Remote Control, as we defined in our previous Remote Control.
+ 3. Define Command which implements the Common Command interface.
+    ```
+    public class LightOnCommand implements Command{
+      Light light;
+      public LightOnCommand(Light light){
+         this.light = light;
+      }
+      public void execute(){
+         light.on();
+      }
+      public void undo() {
+         light.off();
+      }
+    }
+    ```
+    ```
+    public class LightOffCommand implements Command{
+          Light light;
+          public LightOffCommand(Light light){
+             this.light = light;
+          }
+          public void execute(){
+             light.off();
+          }
+          public void undo() {
+             light.on();
+          }
+        }
+    ```
+    # Method Usage
+   - execute() method in a command to stores how the particular task is executed on the device. For example: how to 
+   turn on/off light in this case.
+   - undo() method will simply reverse the action defined in execute() method.
+ 4. Now to add Undo functionality to our Remote Control, we only have to do only few changes in our previous Remote Control.
+    ```
+    public class RemoteControlWithUndo{
+        Command[] onCommands;
+        Command[] offCommands;
+    
+        // Here is where we'll stash the last command executed for the undo button
+        Command undoCommand;
+    
+        public RemoteControlWithUndo(){
+            onCommands = new Command[7];
+            offCommands = new Command[7];
+    
+            Command noCommand = new NoCommand();
+            for(int i = 0 ; i < 7 ; i++){
+                onCommands[i] = noCommand;
+                offCommands[i] = noCommand;
+            }
+    
+            //  Just like the other slots, undo starts off with a NoCommand, 
+            //  so pressing undo before any other button won't do anything at all
+            undoCommand = noCommand;
+        }
+    
+        public void setCommand(int slot, Command onCommand, Command offCommand){
+            onCommands[slot] = onCommand;
+            offCommands[slot] = offCommand;
+        }
+    
+        public void onButtonWasPushed(int slot){
+            onCommands[slot].execute();
+    
+            //  When a button is pressed, we take the command and first execute it, then we save its 
+            //  reference to it in the undoCommand instance variable. We do this for both "on" and "off"
+            //  Commands.
+            undoCommand = onCommands[slot];
+        }
+    
+        public void offButtonWasPushed(int slot){
+            offCommands[slot].execute();
+            undoCommand = offCommands[slot];
+        }
+    
+        public void undoButtonWasPushed(){
+            //  When the undo button is pressed, we invoke the undo() method of the command stored in 
+            //  undoCommand. This reverses the operation of the last Command executed.
+            undoCommand.undo();
+        }
+    
+        public String toString(){
+            StringBuffer sb = new StringBuffer();
+            sb.append("\n-----------------------Remote Control----------------------------\n");
+            for(int i = 0 ; i < 7; i++){
+                sb.append("[slot "+ i +"] "+ onCommands[i].getClass().getName() + "      "+ offCommands[i].getClass().getName() + "\n");
+            }
+            return sb.toString();
+        }
+    }
+    ```
+ 5. Now we can define Remote Loader and assign tasks to the Remote Control slots and use it to perform our desired tasks as we did in our previous Remote controls.
+    ```
+    public class RemoteLoader{
+        public static void main(String args[]){
+            RemoteControlWithUndo remoteControl = new RemoteControlWithUndo();
+            Light livingRoomLight = new Light("Living Room");
+            CeilingFan ceilingFan = new CeilingFan("Living Room");
+    
+            LightOnCommand livingRoomLightOn = new LightOnCommand(livingRoomLight);
+            LightOffCommand livingRoomLightOff = new LightOffCommand(livingRoomLight);
+    
+            CeilingFanMediumCommand ceilingFanMedium = new CeilingFanMediumCommand(ceilingFan);
+            CeilingFanHighCommand ceilingFanHigh = new CeilingFanHighCommand(ceilingFan);
+            CeilingFanOffCommand ceilingFanOff = new CeilingFanOffCommand(ceilingFan);
+    
+            remoteControl.setCommand(0, livingRoomLightOn, livingRoomLightOff);
+            remoteControl.setCommand(1, ceilingFanMedium, ceilingFanOff);
+            remoteControl.setCommand(2, ceilingFanHigh, ceilingFanOff);
+    
+            System.out.println(remoteControl);
+    
+            remoteControl.onButtonWasPushed(0);
+            remoteControl.offButtonWasPushed(0);
+            remoteControl.undoButtonWasPushed();
+    
+            remoteControl.onButtonWasPushed(1);
+            remoteControl.offButtonWasPushed(1);
+            remoteControl.undoButtonWasPushed();
+    
+            remoteControl.onButtonWasPushed(2);
+            remoteControl.offButtonWasPushed(2);
+            remoteControl.undoButtonWasPushed();
+        }
+    }
+    ```
 
+
+#### Note: This code is present in [remote_control_with_undo](https://github.com/chiragkaushik/Command-Pattern/tree/main/remote_control_with_undo) directory in this repository
